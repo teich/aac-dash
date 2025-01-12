@@ -22,8 +22,28 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import Link from 'next/link';
 
-export function CompanyCard({ company }) {
+interface Company {
+  name: string;
+  domain?: string;
+  revenue?: string;
+  total_sales: number;
+  total_people: number;
+  total_orders: number;
+  primary_industry?: string;
+  all_industries?: string[];
+  employees?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  year_founded?: string;
+  monthly_visitors?: string;
+  description?: string;
+  linkedin_url?: string;
+}
+
+export function CompanyCard({ company }: { company: Company }) {
   const getLocationString = () => {
     const parts = [company.city, company.state, company.country]
       .filter(Boolean)
@@ -120,13 +140,26 @@ export function CompanyCard({ company }) {
             <div className="flex items-start gap-2 text-sm">
               <Building2 className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
               <div className="flex-1">
-                <span className="font-medium">{formatIndustry(company.primary_industry)}</span>
+                <Link 
+                  href={`/?industry=${encodeURIComponent(company.primary_industry)}`}
+                  className="font-medium hover:underline"
+                >
+                  {formatIndustry(company.primary_industry)}
+                </Link>
                 {getSecondaryIndustries().length > 0 && (
                   <span className="text-muted-foreground">
                     {", "}
-                    {getSecondaryIndustries()
-                      .map(industry => formatIndustry(industry))
-                      .join(", ")}
+                    {getSecondaryIndustries().map((industry, index) => (
+                      <span key={industry}>
+                        <Link
+                          href={`/?industry=${encodeURIComponent(industry)}`}
+                          className="hover:underline"
+                        >
+                          {formatIndustry(industry)}
+                        </Link>
+                        {index < getSecondaryIndustries().length - 1 && ", "}
+                      </span>
+                    ))}
                   </span>
                 )}
               </div>

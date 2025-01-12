@@ -11,7 +11,7 @@ const pool = new Pool({
   database: process.env.POSTGRES_DB,
 });
 
-export async function getCompaniesData() {
+export async function getCompaniesData(industry?: string) {
   try {
     const result = await pool.query(`
       WITH revenue_order AS (
@@ -56,6 +56,9 @@ export async function getCompaniesData() {
       JOIN revenue_order ro ON ro.revenue = c.enrichment_data->'finances'->>'revenue'
       LEFT JOIN people p ON p.company_id = c.id
       LEFT JOIN orders o ON o.person_id = p.id
+      WHERE ($1::text IS NULL OR 
+        c.enrichment_data->'about'->>'industry' = $1 OR 
+        $1 = ANY(SELECT jsonb_array_elements_text(c.enrichment_data->'about'->'industries')))
       GROUP BY
         c.id,
         c.name,
@@ -68,7 +71,7 @@ export async function getCompaniesData() {
         ro.revenue_rank DESC,
         c.name ASC
       LIMIT 50
-    `);
+    `, [industry || null]);
     return result.rows;
   } catch (error) {
     console.error("Database Error:", error);
