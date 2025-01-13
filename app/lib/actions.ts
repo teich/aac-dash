@@ -1,100 +1,102 @@
 // app/lib/actions.ts
 "use server";
 
-import { Pool } from "pg";
-
-const pool = new Pool({
-  host: process.env.POSTGRES_HOST,
-  port: parseInt(process.env.POSTGRES_PORT || "5432"),
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
-});
+import { pool } from "@/lib/db";
 
 // List of consumer domains to exclude
 const CONSUMER_DOMAINS = [
-  'gmail.com',
-  'yahoo.com',
-  'hotmail.com',
-  'outlook.com',
-  'aol.com',
-  'msn.com',
-  'live.com',
-  'icloud.com',
-  'facebook.com',
-  'twitter.com',
-  'instagram.com',
-  'linkedin.com',
-  'google.com',
-  'microsoft.com',
-  'apple.com',
-  'amazon.com',
-  'netflix.com',
-  'spotify.com',
-  'youtube.com',
-  'tiktok.com',
-  'comcast.net',
-  'verizon.net',
-  'sbcglobal.net',
-  'cox.net',
-  'att.net',
-  'bellsouth.net',
-  'earthlink.net',
-  'juno.com',
-  'mac.com',
-  'optonline.net',
-  'roadrunner.com',
-  'me.com',
-  'GMAIL.COM',
-  'charter.net',
+  "gmail.com",
+  "yahoo.com",
+  "hotmail.com",
+  "outlook.com",
+  "aol.com",
+  "msn.com",
+  "live.com",
+  "icloud.com",
+  "facebook.com",
+  "twitter.com",
+  "instagram.com",
+  "linkedin.com",
+  "google.com",
+  "microsoft.com",
+  "apple.com",
+  "amazon.com",
+  "netflix.com",
+  "spotify.com",
+  "youtube.com",
+  "tiktok.com",
+  "comcast.net",
+  "verizon.net",
+  "sbcglobal.net",
+  "cox.net",
+  "att.net",
+  "bellsouth.net",
+  "earthlink.net",
+  "juno.com",
+  "mac.com",
+  "optonline.net",
+  "roadrunner.com",
+  "me.com",
+  "GMAIL.COM",
+  "charter.net",
 ];
 
 export async function getCompaniesData(
-  industry?: string, 
+  industry?: string,
   includeConsumerSites: boolean = false,
   search?: string,
   page: number = 1,
   pageSize: number = 12,
-  sortField: string = 'total_sales',
-  sortDirection: 'asc' | 'desc' = 'desc',
-  revenueRanges: string[] = []
+  sortField: string = "total_sales",
+  sortDirection: "asc" | "desc" = "desc",
+  revenueRanges: string[] = [],
 ) {
   // Validate sort field to prevent SQL injection
   const allowedSortFields = [
-    'name',
-    'domain',
-    'total_sales',
-    'total_orders',
-    'total_people',
-    'monthly_visitors',
-    'employees',
-    'year_founded'
+    "name",
+    "domain",
+    "total_sales",
+    "total_orders",
+    "total_people",
+    "monthly_visitors",
+    "employees",
+    "year_founded",
   ];
-  
+
   if (!allowedSortFields.includes(sortField)) {
-    sortField = 'total_sales';
+    sortField = "total_sales";
   }
 
   try {
     // First get total count for pagination
-    const countResult = await pool.query(`
+    const countResult = await pool.query(
+      `
       SELECT COUNT(DISTINCT c.id)
       FROM companies c
-      WHERE ($1::text IS NULL OR 
-        c.enrichment_data->'about'->>'industry' = $1 OR 
+      WHERE ($1::text IS NULL OR
+        c.enrichment_data->'about'->>'industry' = $1 OR
         $1 = ANY(SELECT jsonb_array_elements_text(c.enrichment_data->'about'->'industries')))
         AND ($3 OR NOT (c.domain = ANY($2)))
-        AND ($4::text IS NULL OR 
-          LOWER(c.name) LIKE LOWER($4) OR 
+        AND ($4::text IS NULL OR
+          LOWER(c.name) LIKE LOWER($4) OR
           LOWER(c.domain) LIKE LOWER($4))
         AND ($5::text[] IS NULL OR array_length($5, 1) IS NULL OR
           c.enrichment_data->'finances'->>'revenue' = ANY($5))
-    `, [industry || null, CONSUMER_DOMAINS, includeConsumerSites, search ? `%${search}%` : null, revenueRanges.length > 0 ? revenueRanges : null]);
+    `,
+      [
+        industry || null,
+        CONSUMER_DOMAINS,
+        includeConsumerSites,
+        search ? `%${search}%` : null,
+        revenueRanges.length > 0 ? revenueRanges : null,
+      ],
+    );
 
     const totalCount = parseInt(countResult.rows[0].count);
 
     // Then get paginated data
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT
         c.id,
         c.name,
@@ -117,12 +119,12 @@ export async function getCompaniesData(
       FROM companies c
       LEFT JOIN people p ON p.company_id = c.id
       LEFT JOIN orders o ON o.person_id = p.id
-      WHERE ($1::text IS NULL OR 
-        c.enrichment_data->'about'->>'industry' = $1 OR 
+      WHERE ($1::text IS NULL OR
+        c.enrichment_data->'about'->>'industry' = $1 OR
         $1 = ANY(SELECT jsonb_array_elements_text(c.enrichment_data->'about'->'industries')))
         AND ($3 OR NOT (c.domain = ANY($2)))
-        AND ($4::text IS NULL OR 
-          LOWER(c.name) LIKE LOWER($4) OR 
+        AND ($4::text IS NULL OR
+          LOWER(c.name) LIKE LOWER($4) OR
           LOWER(c.domain) LIKE LOWER($4))
         AND ($5::text[] IS NULL OR array_length($5, 1) IS NULL OR
           c.enrichment_data->'finances'->>'revenue' = ANY($5))
@@ -156,25 +158,27 @@ export async function getCompaniesData(
         c.name ASC
       LIMIT $6
       OFFSET $9
-    `, [
-      industry || null, 
-      CONSUMER_DOMAINS, 
-      includeConsumerSites,
-      search ? `%${search}%` : null,
-      revenueRanges.length > 0 ? revenueRanges : null,
-      pageSize,
-      sortDirection,
-      sortField,
-      (page - 1) * pageSize
-    ]);
+    `,
+      [
+        industry || null,
+        CONSUMER_DOMAINS,
+        includeConsumerSites,
+        search ? `%${search}%` : null,
+        revenueRanges.length > 0 ? revenueRanges : null,
+        pageSize,
+        sortDirection,
+        sortField,
+        (page - 1) * pageSize,
+      ],
+    );
 
     return {
       companies: result.rows,
       totalCount,
-      totalPages: Math.ceil(totalCount / pageSize)
+      totalPages: Math.ceil(totalCount / pageSize),
     };
   } catch (error) {
-    console.error('Error fetching companies:', error);
+    console.error("Error fetching companies:", error);
     throw error;
   }
 }
