@@ -33,7 +33,20 @@ const CONSUMER_DOMAINS = [
   'spotify.com',
   'youtube.com',
   'tiktok.com',
-  'comcast.net'
+  'comcast.net',
+  'verizon.net',
+  'sbcglobal.net',
+  'cox.net',
+  'att.net',
+  'bellsouth.net',
+  'earthlink.net',
+  'juno.com',
+  'mac.com',
+  'optonline.net',
+  'roadrunner.com',
+  'me.com',
+  'GMAIL.COM',
+  'charter.net',
 ];
 
 export async function getCompaniesData(
@@ -41,8 +54,26 @@ export async function getCompaniesData(
   includeConsumerSites: boolean = false,
   search?: string,
   page: number = 1,
-  pageSize: number = 12
+  pageSize: number = 12,
+  sortField: string = 'total_sales',
+  sortDirection: 'asc' | 'desc' = 'desc'
 ) {
+  // Validate sort field to prevent SQL injection
+  const allowedSortFields = [
+    'name',
+    'domain',
+    'total_sales',
+    'total_orders',
+    'total_people',
+    'monthly_visitors',
+    'employees',
+    'year_founded'
+  ];
+  
+  if (!allowedSortFields.includes(sortField)) {
+    sortField = 'total_sales';
+  }
+
   try {
     // First get total count for pagination
     const countResult = await pool.query(`
@@ -97,7 +128,26 @@ export async function getCompaniesData(
         c.linkedin_url,
         c.enrichment_data
       ORDER BY
-        total_sales DESC,
+        CASE
+          WHEN $8 = 'name' AND $7 = 'desc' THEN c.name END DESC NULLS LAST,
+        CASE
+          WHEN $8 = 'name' AND $7 = 'asc' THEN c.name END ASC NULLS LAST,
+        CASE
+          WHEN $8 = 'domain' AND $7 = 'desc' THEN c.domain END DESC NULLS LAST,
+        CASE
+          WHEN $8 = 'domain' AND $7 = 'asc' THEN c.domain END ASC NULLS LAST,
+        CASE
+          WHEN $8 = 'total_sales' AND $7 = 'desc' THEN SUM(o.amount) END DESC NULLS LAST,
+        CASE
+          WHEN $8 = 'total_sales' AND $7 = 'asc' THEN SUM(o.amount) END ASC NULLS LAST,
+        CASE
+          WHEN $8 = 'total_orders' AND $7 = 'desc' THEN COUNT(DISTINCT o.id) END DESC NULLS LAST,
+        CASE
+          WHEN $8 = 'total_orders' AND $7 = 'asc' THEN COUNT(DISTINCT o.id) END ASC NULLS LAST,
+        CASE
+          WHEN $8 = 'total_people' AND $7 = 'desc' THEN COUNT(DISTINCT p.id) END DESC NULLS LAST,
+        CASE
+          WHEN $8 = 'total_people' AND $7 = 'asc' THEN COUNT(DISTINCT p.id) END ASC NULLS LAST,
         c.name ASC
       LIMIT $5
       OFFSET $6
@@ -107,7 +157,9 @@ export async function getCompaniesData(
       includeConsumerSites,
       search ? `%${search}%` : null,
       pageSize,
-      (page - 1) * pageSize
+      (page - 1) * pageSize,
+      sortDirection,
+      sortField
     ]);
 
     return {

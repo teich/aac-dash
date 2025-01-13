@@ -37,6 +37,8 @@ export default async function Page({
   const search = typeof params.search === 'string' ? params.search : undefined;
   const page = typeof params.page === 'string' ? parseInt(params.page) : 1;
   const viewMode = typeof params.view === 'string' ? (params.view as 'grid' | 'table') : 'grid';
+  const sortField = typeof params.sort === 'string' ? params.sort : 'total_sales';
+  const sortDirection = params.dir === 'asc' ? 'asc' : 'desc';
   const pageSize = 12;
 
   const { companies, totalCount, totalPages } = await getCompaniesData(
@@ -44,7 +46,9 @@ export default async function Page({
     includeConsumerSites,
     search,
     page,
-    pageSize
+    pageSize,
+    sortField,
+    sortDirection
   );
 
   return (
@@ -85,7 +89,11 @@ export default async function Page({
           ))}
         </div>
       ) : (
-        <CompaniesTable companies={companies} />
+        <CompaniesTable 
+          companies={companies} 
+          sortField={sortField}
+          sortDirection={sortDirection}
+        />
       )}
 
       {/* Pagination */}
