@@ -2,10 +2,8 @@
 import { Suspense } from 'react';
 import { getCompaniesData } from './lib/actions';
 import { CompanyCard } from './components/CompanyCard';
-import Link from 'next/link';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { CompaniesTable } from './components/CompaniesTable';
+import { CompanyFilters } from './components/CompanyFilters';
 import {
   Pagination,
   PaginationContent,
@@ -31,13 +29,14 @@ const CardSkeleton = () => (
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const params = await searchParams;
   const industry = typeof params.industry === 'string' ? params.industry : undefined;
   const includeConsumerSites = params.includeConsumer === 'true';
   const search = typeof params.search === 'string' ? params.search : undefined;
   const page = typeof params.page === 'string' ? parseInt(params.page) : 1;
+  const viewMode = typeof params.view === 'string' ? (params.view as 'grid' | 'table') : 'grid';
   const pageSize = 12;
 
   const { companies, totalCount, totalPages } = await getCompaniesData(
@@ -48,77 +47,15 @@ export default async function Page({
     pageSize
   );
 
-  const buildUrl = (newParams: Record<string, string>) => {
-    const currentParams = new URLSearchParams();
-    if (industry) currentParams.set('industry', industry);
-    if (includeConsumerSites) currentParams.set('includeConsumer', 'true');
-    if (search) currentParams.set('search', search);
-    if (page > 1) currentParams.set('page', page.toString());
-    
-    // Override with new params
-    Object.entries(newParams).forEach(([key, value]) => {
-      if (value) {
-        currentParams.set(key, value);
-      } else {
-        currentParams.delete(key);
-      }
-    });
-    
-    return `?${currentParams.toString()}`;
-  };
-
   return (
     <div className="container mx-auto p-6">
       <header className="mb-8 space-y-4">
-        <h1 className="text-3xl font-bold tracking-tight">Companies</h1>
-        
-        {/* Search and filters */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <form className="flex w-full sm:w-auto items-center gap-2">
-            <div className="relative flex items-center w-[350px]">
-              <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
-              <Input
-                type="search"
-                name="search"
-                placeholder="Search companies..."
-                defaultValue={search}
-                className="pl-11 pr-8"
-              />
-              {search && (
-                <Link
-                  href={buildUrl({ search: '', page: '1' })}
-                  className="absolute right-3 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </Link>
-              )}
-            </div>
-            <Button type="submit" variant="default">
-              Search
-            </Button>
-          </form>
-
-          <div className="flex items-center gap-2">
-            {industry && (
-              <Button 
-                variant="outline" 
-                asChild
-              >
-                <Link href={buildUrl({ industry: '' })}>
-                  Clear industry filter
-                </Link>
-              </Button>
-            )}
-            <Button 
-              variant="outline" 
-              asChild
-            >
-              <Link href={buildUrl({ includeConsumer: (!includeConsumerSites).toString() })}>
-                {includeConsumerSites ? 'Hide' : 'Show'} consumer sites
-              </Link>
-            </Button>
-          </div>
-        </div>
+        <CompanyFilters
+          search={search}
+          industry={industry}
+          includeConsumerSites={includeConsumerSites}
+          viewMode={viewMode}
+        />
 
         {/* Results info */}
         <div className="text-sm text-muted-foreground">
@@ -139,13 +76,17 @@ export default async function Page({
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {companies.map(company => (
-          <Suspense key={company.id} fallback={<CardSkeleton />}>
-            <CompanyCard company={company} />
-          </Suspense>
-        ))}
-      </div>
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {companies.map(company => (
+            <Suspense key={company.id} fallback={<CardSkeleton />}>
+              <CompanyCard company={company} />
+            </Suspense>
+          ))}
+        </div>
+      ) : (
+        <CompaniesTable companies={companies} />
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -154,13 +95,13 @@ export default async function Page({
             <PaginationContent>
               {page > 1 && (
                 <PaginationItem>
-                  <PaginationPrevious href={buildUrl({ page: (page - 1).toString() })} />
+                  <PaginationPrevious href={`?${new URLSearchParams({ ...params, page: (page - 1).toString() })}`} />
                 </PaginationItem>
               )}
               
               <PaginationItem>
                 <PaginationLink 
-                  href={buildUrl({ page: "1" })}
+                  href={`?${new URLSearchParams({ ...params, page: "1" })}`}
                   isActive={page === 1}
                 >
                   1
@@ -172,7 +113,7 @@ export default async function Page({
               {page !== 1 && page !== totalPages && (
                 <PaginationItem>
                   <PaginationLink 
-                    href={buildUrl({ page: page.toString() })}
+                    href={`?${new URLSearchParams({ ...params, page: page.toString() })}`}
                     isActive={true}
                   >
                     {page}
@@ -185,7 +126,7 @@ export default async function Page({
               {totalPages !== 1 && (
                 <PaginationItem>
                   <PaginationLink 
-                    href={buildUrl({ page: totalPages.toString() })}
+                    href={`?${new URLSearchParams({ ...params, page: totalPages.toString() })}`}
                     isActive={page === totalPages}
                   >
                     {totalPages}
@@ -195,7 +136,7 @@ export default async function Page({
 
               {page < totalPages && (
                 <PaginationItem>
-                  <PaginationNext href={buildUrl({ page: (page + 1).toString() })} />
+                  <PaginationNext href={`?${new URLSearchParams({ ...params, page: (page + 1).toString() })}`} />
                 </PaginationItem>
               )}
             </PaginationContent>
