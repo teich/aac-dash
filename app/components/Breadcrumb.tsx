@@ -17,7 +17,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
       >
         Home
       </Link>
-      {items.map((item, index) => (
+      {items.map((item) => (
         <span key={item.href} className="flex items-center space-x-1">
           <ChevronRight className="h-4 w-4" />
           <Link

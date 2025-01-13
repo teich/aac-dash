@@ -123,12 +123,12 @@ async function getCompanyData(domain: string): Promise<CompanyData | null> {
   }
 }
 
-export default async function CompanyPage({
-  params,
-}: {
-  params: Promise<{ domain: string }> | { domain: string }
-}) {
-  const resolvedParams = await Promise.resolve(params);
+type PageProps = {
+  params: Promise<{ domain: string }>;
+};
+
+export default async function CompanyPage({ params }: PageProps) {
+  const resolvedParams = await params;
   const companyData = await getCompanyData(resolvedParams.domain);
 
   if (!companyData) {

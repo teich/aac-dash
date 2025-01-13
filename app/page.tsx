@@ -26,11 +26,11 @@ const CardSkeleton = () => (
   </div>
 );
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
   const industry = typeof params.industry === 'string' ? params.industry : undefined;
   const includeConsumerSites = params.includeConsumer === 'true';
@@ -70,7 +70,7 @@ export default async function Page({
         <div className="text-sm text-muted-foreground">
           {search ? (
             <p>
-              Found {totalCount} {totalCount === 1 ? 'company' : 'companies'} matching "{search}"
+              Found {totalCount} {totalCount === 1 ? 'company' : 'companies'} matching &quot;{search}&quot;
               {industry && ` in ${industry}`}
               {!includeConsumerSites && ' (excluding consumer sites)'}
             </p>
