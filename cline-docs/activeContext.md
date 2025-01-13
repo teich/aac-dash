@@ -5,11 +5,11 @@
 - Core documentation established
 
 ## Recent Changes
-- Created productContext.md documenting project purpose and functionality
-- Created techContext.md detailing technical stack and setup
-- Created systemPatterns.md outlining architecture and patterns
-- Created progress.md tracking project status
-- Created activeContext.md (this file) for ongoing work
+- Inspected complete database schema via MCP postgres tool
+- Updated techContext.md with detailed table structures
+- Enhanced systemPatterns.md with comprehensive data relationships
+- Documented database design patterns and optimization strategies
+- Mapped out complete data hierarchy: Companies -> People -> Orders -> Line Items -> Products
 
 ## Next Steps
 1. Verify memory bank completeness
@@ -17,9 +17,10 @@
 3. Keep documentation updated as project evolves
 
 ## Current Focus Areas
-- Understanding existing codebase structure
-- Documenting system architecture
-- Preparing for feature development
+- Understanding database schema and relationships
+- Documenting data flow and access patterns
+- Identifying optimization opportunities for queries
+- Planning feature development around data model
 
 ## Active Components
 - Main company listing page (app/page.tsx)
@@ -29,6 +30,7 @@
 
 ## Development Status
 - Environment: Development
-- Database: PostgreSQL connected
+- Database: PostgreSQL connected and fully mapped
+- Schema: 5 core tables documented (companies, people, orders, line_items, products)
 - Features: Core company listing implemented
-- Documentation: Initial setup complete
+- Documentation: Database structure and relationships documented

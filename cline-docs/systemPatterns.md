@@ -33,7 +33,28 @@ app/
 1. Database Layer
    - PostgreSQL with structured tables
    - JSONB for flexible enrichment data
-   - Relationships: Companies -> People -> Orders
+   - Core Relationships:
+     * Companies -> People (one-to-many)
+     * People -> Orders (one-to-many)
+     * Orders -> Line Items (one-to-many)
+     * Line Items -> Products (many-to-one)
+   - Data hierarchy:
+     1. Companies (root entity)
+        - Enrichment data in JSONB for flexibility
+        - Stores company metadata and analytics
+     2. People (company contacts)
+        - Linked to companies via company_id
+        - Stores contact and address information
+     3. Orders (sales transactions)
+        - Linked to people via person_id
+        - Tracks order date and total amount
+     4. Line Items (order details)
+        - Linked to orders via order_id
+        - Linked to products via product_id
+        - Stores quantity and pricing details
+     5. Products (catalog)
+        - Referenced by line items
+        - Stores product information and SKUs
 
 2. Server Actions
    - Centralized data fetching in actions.ts
@@ -49,12 +70,30 @@ app/
 
 ### Database Design
 - Use of JSONB for enrichment data to allow flexible schema evolution
-- Normalized structure for core entities (companies, people, orders)
+- Fully normalized structure for core entities:
+  * Companies: Central business entities with enrichment data
+  * People: Contact information and company association
+  * Orders: Transaction records with total amounts
+  * Line Items: Detailed order contents with pricing
+  * Products: Product catalog with SKUs
+- Key design decisions:
+  * JSONB for flexible company enrichment data
+  * Required foreign keys ensure data integrity
+  * Timestamps for audit trails
+  * Numeric type for monetary values
+  * Text type for flexible string storage
 - Consumer domain filtering at query level
 
 ### Performance Optimizations
 - Server-side pagination
-- Efficient SQL queries with proper joins
+- Efficient SQL queries with proper joins:
+  * Join companies -> people for contact info
+  * Join people -> orders for sales data
+  * Join orders -> line_items -> products for details
+- Aggregate queries for:
+  * Total order amounts per company
+  * Product sales analysis
+  * Customer purchase history
 - Suspense for progressive loading
 - Skeleton loading states
 

@@ -36,15 +36,64 @@
 ## Technical Constraints
 
 ### Database Schema
-- Companies table with JSONB enrichment_data containing:
+
+#### Companies Table
+- id: integer (PK, auto-increment)
+- name: text (required)
+- domain: text
+- linkedin_url: text
+- enrichment_data: jsonb - Contains:
   - about (industry, employees, year founded)
   - finances (revenue)
   - descriptions
   - analytics (monthly visitors)
   - locations (headquarters)
   - assets (logo)
-- People table linked to companies
-- Orders table linked to people
+- enrichment_source: text
+- enriched_date: timestamp with time zone
+- created_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
+- updated_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
+
+#### People Table
+- id: integer (PK, auto-increment)
+- name: text (required)
+- email: text (required)
+- phone: text
+- address: text
+- city: text
+- state: text
+- zip: text
+- country: text
+- company_id: integer (FK to companies.id, required)
+- created_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
+- updated_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
+
+#### Orders Table
+- id: integer (PK, auto-increment)
+- person_id: integer (FK to people.id, required)
+- date: date (required)
+- amount: numeric (required)
+- invoice_number: text
+- created_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
+- updated_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
+
+#### Line Items Table
+- id: integer (PK, auto-increment)
+- order_id: integer (FK to orders.id, required)
+- product_id: integer (FK to products.id, required)
+- unit_price: numeric (required)
+- quantity: integer (required)
+- amount: numeric (required)
+- created_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
+- updated_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
+
+#### Products Table
+- id: integer (PK, auto-increment)
+- name: text (required)
+- description: text
+- sku: text (required)
+- created_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
+- updated_at: timestamp with time zone (default: CURRENT_TIMESTAMP)
 
 ### Performance Considerations
 - Server-side rendering for initial page load
