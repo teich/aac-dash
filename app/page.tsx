@@ -23,7 +23,8 @@ export default async function Page({
 }) {
   const params = await searchParams;
   const industry = typeof params.industry === 'string' ? params.industry : undefined;
-  const data = await getCompaniesData(industry);
+  const includeConsumerSites = params.includeConsumer === 'true';
+  const data = await getCompaniesData(industry, includeConsumerSites);
 
   return (
     <div className="container mx-auto p-6">
@@ -33,16 +34,28 @@ export default async function Page({
           <p className="text-muted-foreground">
             {industry 
               ? `Showing companies in ${industry}`
-              : 'Showing top companies by revenue'}
+              : 'Showing top companies by sales'}
+            {!includeConsumerSites && ' (excluding consumer sites)'}
           </p>
-          {industry && (
+          <div className="flex gap-2 ml-2">
+            {industry && (
+              <Link 
+                href="/"
+                className="text-sm text-primary hover:underline"
+              >
+                (Clear industry filter)
+              </Link>
+            )}
             <Link 
-              href="/"
+              href={`?${new URLSearchParams({
+                ...(industry ? { industry } : {}),
+                includeConsumer: (!includeConsumerSites).toString()
+              })}`}
               className="text-sm text-primary hover:underline"
             >
-              (Clear filter)
+              ({includeConsumerSites ? 'Hide' : 'Show'} consumer sites)
             </Link>
-          )}
+          </div>
         </div>
       </header>
 
