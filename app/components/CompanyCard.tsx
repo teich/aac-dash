@@ -21,7 +21,7 @@ import {
   UserSquare2,
   ShoppingCart,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -42,6 +42,7 @@ interface Company {
   monthly_visitors?: string;
   description?: string;
   linkedin_url?: string;
+  logo_square?: string;
 }
 
 export function CompanyCard({ company }: { company: Company }) {
@@ -105,6 +106,9 @@ export function CompanyCard({ company }: { company: Company }) {
           <div className="flex justify-between items-start gap-4">
             <div className="flex gap-3 items-center">
               <Avatar className="h-12 w-12">
+                {company.logo_square && (
+                  <AvatarImage src={company.logo_square} alt={`${company.name} logo`} />
+                )}
                 <AvatarFallback className="bg-primary/10">
                   {getInitials(company.name)}
                 </AvatarFallback>

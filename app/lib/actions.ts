@@ -36,8 +36,30 @@ const CONSUMER_DOMAINS = [
   'comcast.net'
 ];
 
-export async function getCompaniesData(industry?: string, includeConsumerSites: boolean = false) {
+export async function getCompaniesData(
+  industry?: string, 
+  includeConsumerSites: boolean = false,
+  search?: string,
+  page: number = 1,
+  pageSize: number = 12
+) {
   try {
+    // First get total count for pagination
+    const countResult = await pool.query(`
+      SELECT COUNT(DISTINCT c.id)
+      FROM companies c
+      WHERE ($1::text IS NULL OR 
+        c.enrichment_data->'about'->>'industry' = $1 OR 
+        $1 = ANY(SELECT jsonb_array_elements_text(c.enrichment_data->'about'->'industries')))
+        AND ($3 OR NOT (c.domain = ANY($2)))
+        AND ($4::text IS NULL OR 
+          LOWER(c.name) LIKE LOWER($4) OR 
+          LOWER(c.domain) LIKE LOWER($4))
+    `, [industry || null, CONSUMER_DOMAINS, includeConsumerSites, search ? `%${search}%` : null]);
+
+    const totalCount = parseInt(countResult.rows[0].count);
+
+    // Then get paginated data
     const result = await pool.query(`
       SELECT
         c.id,
@@ -54,6 +76,7 @@ export async function getCompaniesData(industry?: string, includeConsumerSites: 
         c.enrichment_data->'locations'->'headquarters'->'country'->>'name' as country,
         c.enrichment_data->'locations'->'headquarters'->'city'->>'name' as city,
         c.enrichment_data->'locations'->'headquarters'->'state'->>'name' as state,
+        c.enrichment_data->'assets'->'logoSquare'->>'src' as logo_square,
         COUNT(DISTINCT p.id) as total_people,
         COALESCE(SUM(o.amount), 0) as total_sales,
         COUNT(DISTINCT o.id) as total_orders
@@ -64,6 +87,9 @@ export async function getCompaniesData(industry?: string, includeConsumerSites: 
         c.enrichment_data->'about'->>'industry' = $1 OR 
         $1 = ANY(SELECT jsonb_array_elements_text(c.enrichment_data->'about'->'industries')))
         AND ($3 OR NOT (c.domain = ANY($2)))
+        AND ($4::text IS NULL OR 
+          LOWER(c.name) LIKE LOWER($4) OR 
+          LOWER(c.domain) LIKE LOWER($4))
       GROUP BY
         c.id,
         c.name,
@@ -73,9 +99,22 @@ export async function getCompaniesData(industry?: string, includeConsumerSites: 
       ORDER BY
         total_sales DESC,
         c.name ASC
-      LIMIT 50
-    `, [industry || null, CONSUMER_DOMAINS, includeConsumerSites]);
-    return result.rows;
+      LIMIT $5
+      OFFSET $6
+    `, [
+      industry || null, 
+      CONSUMER_DOMAINS, 
+      includeConsumerSites,
+      search ? `%${search}%` : null,
+      pageSize,
+      (page - 1) * pageSize
+    ]);
+
+    return {
+      companies: result.rows,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize)
+    };
   } catch (error) {
     console.error("Database Error:", error);
     throw error;
