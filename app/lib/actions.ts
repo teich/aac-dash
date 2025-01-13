@@ -56,7 +56,8 @@ export async function getCompaniesData(
   page: number = 1,
   pageSize: number = 12,
   sortField: string = 'total_sales',
-  sortDirection: 'asc' | 'desc' = 'desc'
+  sortDirection: 'asc' | 'desc' = 'desc',
+  revenueRanges: string[] = []
 ) {
   // Validate sort field to prevent SQL injection
   const allowedSortFields = [
@@ -86,7 +87,9 @@ export async function getCompaniesData(
         AND ($4::text IS NULL OR 
           LOWER(c.name) LIKE LOWER($4) OR 
           LOWER(c.domain) LIKE LOWER($4))
-    `, [industry || null, CONSUMER_DOMAINS, includeConsumerSites, search ? `%${search}%` : null]);
+        AND ($5::text[] IS NULL OR array_length($5, 1) IS NULL OR
+          c.enrichment_data->'finances'->>'revenue' = ANY($5))
+    `, [industry || null, CONSUMER_DOMAINS, includeConsumerSites, search ? `%${search}%` : null, revenueRanges.length > 0 ? revenueRanges : null]);
 
     const totalCount = parseInt(countResult.rows[0].count);
 
@@ -121,6 +124,8 @@ export async function getCompaniesData(
         AND ($4::text IS NULL OR 
           LOWER(c.name) LIKE LOWER($4) OR 
           LOWER(c.domain) LIKE LOWER($4))
+        AND ($5::text[] IS NULL OR array_length($5, 1) IS NULL OR
+          c.enrichment_data->'finances'->>'revenue' = ANY($5))
       GROUP BY
         c.id,
         c.name,
@@ -149,17 +154,18 @@ export async function getCompaniesData(
         CASE
           WHEN $8 = 'total_people' AND $7 = 'asc' THEN COUNT(DISTINCT p.id) END ASC NULLS LAST,
         c.name ASC
-      LIMIT $5
-      OFFSET $6
+      LIMIT $6
+      OFFSET $9
     `, [
       industry || null, 
       CONSUMER_DOMAINS, 
       includeConsumerSites,
       search ? `%${search}%` : null,
+      revenueRanges.length > 0 ? revenueRanges : null,
       pageSize,
-      (page - 1) * pageSize,
       sortDirection,
-      sortField
+      sortField,
+      (page - 1) * pageSize
     ]);
 
     return {
@@ -168,7 +174,7 @@ export async function getCompaniesData(
       totalPages: Math.ceil(totalCount / pageSize)
     };
   } catch (error) {
-    console.error("Database Error:", error);
+    console.error('Error fetching companies:', error);
     throw error;
   }
 }

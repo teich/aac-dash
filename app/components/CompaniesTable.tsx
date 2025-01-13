@@ -20,6 +20,7 @@ interface Company {
   total_sales: number;
   total_people: number;
   total_orders: number;
+  revenue?: string;
 }
 
 interface CompaniesTableProps {
@@ -39,6 +40,10 @@ export function CompaniesTable({ companies, sortField, sortDirection }: Companie
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const formatRevenue = (revenue: string): string => {
+    return revenue.replace(/-/g, ' to ').replace(/([mb])/g, ' $1illion');
   };
 
   const handleSort = (field: string) => {
@@ -74,6 +79,7 @@ export function CompaniesTable({ companies, sortField, sortDirection }: Companie
             <SortableHeader field="name">Name</SortableHeader>
             <SortableHeader field="domain">Domain</SortableHeader>
             <TableHead>Industry</TableHead>
+            <TableHead>Annual Revenue</TableHead>
             <SortableHeader field="total_sales">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
@@ -104,6 +110,7 @@ export function CompaniesTable({ companies, sortField, sortDirection }: Companie
               </TableCell>
               <TableCell>{company.domain}</TableCell>
               <TableCell>{company.primary_industry || 'N/A'}</TableCell>
+              <TableCell>{company.revenue ? formatRevenue(company.revenue) : 'N/A'}</TableCell>
               <TableCell>{formatCurrency(company.total_sales)}</TableCell>
               <TableCell>{company.total_people.toLocaleString()}</TableCell>
               <TableCell>{company.total_orders.toLocaleString()}</TableCell>

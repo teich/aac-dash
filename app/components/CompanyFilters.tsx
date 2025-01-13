@@ -7,12 +7,14 @@ import { Search, X } from "lucide-react";
 import { ViewToggle } from './ViewToggle';
 import { useRouter } from 'next/navigation';
 import { FormEvent } from 'react';
+import { RevenueFilter } from './RevenueFilter';
 
 interface CompanyFiltersProps {
   search?: string;
   industry?: string;
   includeConsumerSites: boolean;
   viewMode: 'grid' | 'table';
+  revenueRanges?: string[];
 }
 
 export function CompanyFilters({ 
@@ -20,19 +22,27 @@ export function CompanyFilters({
   industry, 
   includeConsumerSites, 
   viewMode,
+  revenueRanges = [],
 }: CompanyFiltersProps) {
   const router = useRouter();
 
-  const buildUrl = (newParams: Record<string, string>) => {
+  const buildUrl = (newParams: Record<string, string | string[]>) => {
     const currentParams = new URLSearchParams();
     if (industry) currentParams.set('industry', industry);
     if (includeConsumerSites) currentParams.set('includeConsumer', 'true');
     if (search) currentParams.set('search', search);
     if (viewMode !== 'grid') currentParams.set('view', viewMode);
+    if (revenueRanges.length > 0) currentParams.set('revenue', revenueRanges.map(range => encodeURIComponent(range)).join(','));
     
     // Override with new params
     Object.entries(newParams).forEach(([key, value]) => {
-      if (value) {
+      if (Array.isArray(value)) {
+        if (value.length > 0) {
+          currentParams.set(key, value.join(','));
+        } else {
+          currentParams.delete(key);
+        }
+      } else if (value) {
         currentParams.set(key, value);
       } else {
         currentParams.delete(key);
@@ -91,6 +101,12 @@ export function CompanyFilters({
         </form>
 
         <div className="flex items-center gap-2">
+          <RevenueFilter
+            selectedRanges={revenueRanges}
+            onChange={(ranges) => {
+              router.push(buildUrl({ revenue: ranges, page: '1' }));
+            }}
+          />
           {industry && (
             <Button 
               variant="outline" 
@@ -113,4 +129,4 @@ export function CompanyFilters({
       </div>
     </div>
   );
-} 
+}

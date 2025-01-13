@@ -39,6 +39,9 @@ export default async function Page({
   const viewMode = typeof params.view === 'string' ? (params.view as 'grid' | 'table') : 'grid';
   const sortField = typeof params.sort === 'string' ? params.sort : 'total_sales';
   const sortDirection = params.dir === 'asc' ? 'asc' : 'desc';
+  const revenueRanges = typeof params.revenue === 'string' 
+    ? params.revenue.split(',').map(range => decodeURIComponent(range))
+    : [];
   const pageSize = 12;
 
   const { companies, totalCount, totalPages } = await getCompaniesData(
@@ -48,7 +51,8 @@ export default async function Page({
     page,
     pageSize,
     sortField,
-    sortDirection
+    sortDirection,
+    revenueRanges
   );
 
   return (
@@ -59,6 +63,7 @@ export default async function Page({
           industry={industry}
           includeConsumerSites={includeConsumerSites}
           viewMode={viewMode}
+          revenueRanges={revenueRanges}
         />
 
         {/* Results info */}
