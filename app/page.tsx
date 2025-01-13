@@ -6,6 +6,15 @@ import Link from 'next/link';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const CardSkeleton = () => (
   <div className="space-y-3">
@@ -140,41 +149,57 @@ export default async function Page({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-8 flex justify-center gap-2">
-          {page > 1 && (
-            <Button 
-              variant="outline" 
-              asChild
-            >
-              <Link href={buildUrl({ page: (page - 1).toString() })}>
-                Previous
-              </Link>
-            </Button>
-          )}
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-              <Button
-                key={pageNum}
-                variant={pageNum === page ? "default" : "outline"}
-                size="sm"
-                asChild
-              >
-                <Link href={buildUrl({ page: pageNum.toString() })}>
-                  {pageNum}
-                </Link>
-              </Button>
-            ))}
-          </div>
-          {page < totalPages && (
-            <Button 
-              variant="outline" 
-              asChild
-            >
-              <Link href={buildUrl({ page: (page + 1).toString() })}>
-                Next
-              </Link>
-            </Button>
-          )}
+        <div className="mt-8">
+          <Pagination>
+            <PaginationContent>
+              {page > 1 && (
+                <PaginationItem>
+                  <PaginationPrevious href={buildUrl({ page: (page - 1).toString() })} />
+                </PaginationItem>
+              )}
+              
+              <PaginationItem>
+                <PaginationLink 
+                  href={buildUrl({ page: "1" })}
+                  isActive={page === 1}
+                >
+                  1
+                </PaginationLink>
+              </PaginationItem>
+
+              {page > 3 && <PaginationEllipsis />}
+
+              {page !== 1 && page !== totalPages && (
+                <PaginationItem>
+                  <PaginationLink 
+                    href={buildUrl({ page: page.toString() })}
+                    isActive={true}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              )}
+
+              {page < totalPages - 2 && <PaginationEllipsis />}
+
+              {totalPages !== 1 && (
+                <PaginationItem>
+                  <PaginationLink 
+                    href={buildUrl({ page: totalPages.toString() })}
+                    isActive={page === totalPages}
+                  >
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              )}
+
+              {page < totalPages && (
+                <PaginationItem>
+                  <PaginationNext href={buildUrl({ page: (page + 1).toString() })} />
+                </PaginationItem>
+              )}
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
     </div>

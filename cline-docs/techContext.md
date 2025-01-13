@@ -1,7 +1,3 @@
-# Technical Context
-
-## Technologies Used
-
 ### Frontend
 - Next.js 15.1.4 with App Router
 - React 19
@@ -10,12 +6,15 @@
 - Radix UI components
 - Lucide React for icons
 - TanStack Table for data tables
-- Recharts for data visualization
+- Use `pnpm dlx shadcn@latest add [component-name]` to add new shadcn components
+- Always check for and prefer shadcn components before implementing custom solutions
+
 
 ### Backend
 - Next.js Server Components/Actions
 - PostgreSQL database
 - Node-Postgres (pg) for database connectivity
+- Use pnpm for node commands
 
 ## Development Setup
 1. Environment Variables Required:
