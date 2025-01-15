@@ -15,7 +15,7 @@ export default async function ReportsPage({ searchParams }: PageProps) {
   let reportData;
   try {
     reportData = await fetchReportData(periodMonths);
-  } catch (error) {
+  } catch {
     return (
       <div className="w-[95%] mx-auto py-8">
         <div className="flex justify-between items-center mb-8">
