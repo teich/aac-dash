@@ -1,5 +1,5 @@
 import { pool } from "@/lib/db";
-import { Company, CompanyData, GetCompaniesOptions, CompaniesResponse } from "../types";
+import { CompanyData, GetCompaniesOptions, CompaniesResponse } from "../types";
 import { CONSUMER_DOMAINS } from "@/app/lib/constants";
 
 export class CompanyService {
