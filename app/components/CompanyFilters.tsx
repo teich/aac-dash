@@ -8,6 +8,7 @@ import { ViewToggle } from './ViewToggle';
 import { useRouter } from 'next/navigation';
 import { FormEvent } from 'react';
 import { RevenueFilter } from './RevenueFilter';
+import { YearFilter } from './YearFilter';
 
 interface CompanyFiltersProps {
   search?: string;
@@ -15,6 +16,7 @@ interface CompanyFiltersProps {
   includeConsumerSites: boolean;
   viewMode: 'grid' | 'table';
   revenueRanges?: string[];
+  years?: number[];
 }
 
 export function CompanyFilters({ 
@@ -23,16 +25,18 @@ export function CompanyFilters({
   includeConsumerSites, 
   viewMode,
   revenueRanges = [],
+  years = [],
 }: CompanyFiltersProps) {
   const router = useRouter();
 
-  const buildUrl = (newParams: Record<string, string | string[]>) => {
+  const buildUrl = (newParams: Record<string, string | string[] | number[]>) => {
     const currentParams = new URLSearchParams();
     if (industry) currentParams.set('industry', industry);
     if (includeConsumerSites) currentParams.set('includeConsumer', 'true');
     if (search) currentParams.set('search', search);
     if (viewMode !== 'grid') currentParams.set('view', viewMode);
     if (revenueRanges.length > 0) currentParams.set('revenue', revenueRanges.map(range => encodeURIComponent(range)).join(','));
+    if (years.length > 0) currentParams.set('years', years.join(','));
     
     // Override with new params
     Object.entries(newParams).forEach(([key, value]) => {
@@ -43,7 +47,7 @@ export function CompanyFilters({
           currentParams.delete(key);
         }
       } else if (value) {
-        currentParams.set(key, value);
+        currentParams.set(key, value.toString());
       } else {
         currentParams.delete(key);
       }
@@ -101,6 +105,12 @@ export function CompanyFilters({
         </form>
 
         <div className="flex items-center gap-2">
+          <YearFilter
+            selectedYears={years}
+            onChange={(newYears) => {
+              router.push(buildUrl({ years: newYears, page: '1' }));
+            }}
+          />
           <RevenueFilter
             selectedRanges={revenueRanges}
             onChange={(ranges) => {

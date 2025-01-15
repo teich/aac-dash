@@ -22,6 +22,9 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   const revenueRanges = typeof params.revenue === 'string' 
     ? params.revenue.split(',').map(range => decodeURIComponent(range))
     : [];
+  const years = typeof params.years === 'string'
+    ? params.years.split(',').map(year => parseInt(year))
+    : [];
   const pageSize = 12;
 
   const { companies, totalCount, totalPages } = await getCompaniesData(
@@ -32,7 +35,8 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
     pageSize,
     sortField,
     sortDirection,
-    revenueRanges
+    revenueRanges,
+    years
   );
 
   return (
@@ -44,6 +48,7 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
           includeConsumerSites={includeConsumerSites}
           viewMode={viewMode}
           revenueRanges={revenueRanges}
+          years={years}
         />
 
         {/* Results info */}

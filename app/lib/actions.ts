@@ -12,6 +12,7 @@ export async function getCompaniesData(
   sortField: string = "total_sales",
   sortDirection: "asc" | "desc" = "desc",
   revenueRanges: string[] = [],
+  years: number[] = [],
 ) {
   const options: GetCompaniesOptions = {
     industry,
@@ -22,6 +23,7 @@ export async function getCompaniesData(
     sortField,
     sortDirection,
     revenueRanges,
+    years,
   };
 
   return CompanyService.getCompanies(options);

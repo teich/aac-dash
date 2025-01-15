@@ -88,6 +88,7 @@ export interface GetCompaniesOptions {
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
   revenueRanges?: string[];
+  years?: number[];
 }
 
 export interface CompaniesResponse {

@@ -64,6 +64,7 @@ export class CompanyService {
       sortField = "total_sales",
       sortDirection = "desc",
       revenueRanges = [],
+      years = [],
     } = options;
 
     // Validate sort field to prevent SQL injection
@@ -80,6 +81,8 @@ export class CompanyService {
         `
         SELECT COUNT(DISTINCT c.id)
         FROM companies c
+        LEFT JOIN people p ON p.company_id = c.id
+        LEFT JOIN orders o ON o.person_id = p.id
         WHERE ($1::text IS NULL OR
           c.enrichment_data->'about'->>'industry' = $1 OR
           $1 = ANY(SELECT jsonb_array_elements_text(c.enrichment_data->'about'->'industries')))
@@ -89,6 +92,8 @@ export class CompanyService {
             LOWER(c.domain) LIKE LOWER($4))
           AND ($5::text[] IS NULL OR array_length($5, 1) IS NULL OR
             c.enrichment_data->'finances'->>'revenue' = ANY($5))
+          AND ($6::int[] IS NULL OR array_length($6, 1) IS NULL OR
+            EXTRACT(YEAR FROM o.date)::integer = ANY($6))
         `,
         [
           industry || null,
@@ -96,6 +101,7 @@ export class CompanyService {
           includeConsumerSites,
           search ? `%${search}%` : null,
           revenueRanges.length > 0 ? revenueRanges : null,
+          years.length > 0 ? years : null,
         ]
       );
 
@@ -135,6 +141,8 @@ export class CompanyService {
             LOWER(c.domain) LIKE LOWER($4))
           AND ($5::text[] IS NULL OR array_length($5, 1) IS NULL OR
             c.enrichment_data->'finances'->>'revenue' = ANY($5))
+          AND ($6::int[] IS NULL OR array_length($6, 1) IS NULL OR
+            EXTRACT(YEAR FROM o.date)::integer = ANY($6))
         GROUP BY
           c.id,
           c.name,
@@ -143,28 +151,28 @@ export class CompanyService {
           c.enrichment_data
         ORDER BY
           CASE
-            WHEN $6 = 'name' AND $7 = 'desc' THEN c.name END DESC NULLS LAST,
+            WHEN $7 = 'name' AND $8 = 'desc' THEN c.name END DESC NULLS LAST,
           CASE
-            WHEN $6 = 'name' AND $7 = 'asc' THEN c.name END ASC NULLS LAST,
+            WHEN $7 = 'name' AND $8 = 'asc' THEN c.name END ASC NULLS LAST,
           CASE
-            WHEN $6 = 'domain' AND $7 = 'desc' THEN c.domain END DESC NULLS LAST,
+            WHEN $7 = 'domain' AND $8 = 'desc' THEN c.domain END DESC NULLS LAST,
           CASE
-            WHEN $6 = 'domain' AND $7 = 'asc' THEN c.domain END ASC NULLS LAST,
+            WHEN $7 = 'domain' AND $8 = 'asc' THEN c.domain END ASC NULLS LAST,
           CASE
-            WHEN $6 = 'total_sales' AND $7 = 'desc' THEN SUM(o.amount) END DESC NULLS LAST,
+            WHEN $7 = 'total_sales' AND $8 = 'desc' THEN SUM(o.amount) END DESC NULLS LAST,
           CASE
-            WHEN $6 = 'total_sales' AND $7 = 'asc' THEN SUM(o.amount) END ASC NULLS LAST,
+            WHEN $7 = 'total_sales' AND $8 = 'asc' THEN SUM(o.amount) END ASC NULLS LAST,
           CASE
-            WHEN $6 = 'total_orders' AND $7 = 'desc' THEN COUNT(DISTINCT o.id) END DESC NULLS LAST,
+            WHEN $7 = 'total_orders' AND $8 = 'desc' THEN COUNT(DISTINCT o.id) END DESC NULLS LAST,
           CASE
-            WHEN $6 = 'total_orders' AND $7 = 'asc' THEN COUNT(DISTINCT o.id) END ASC NULLS LAST,
+            WHEN $7 = 'total_orders' AND $8 = 'asc' THEN COUNT(DISTINCT o.id) END ASC NULLS LAST,
           CASE
-            WHEN $6 = 'total_people' AND $7 = 'desc' THEN COUNT(DISTINCT p.id) END DESC NULLS LAST,
+            WHEN $7 = 'total_people' AND $8 = 'desc' THEN COUNT(DISTINCT p.id) END DESC NULLS LAST,
           CASE
-            WHEN $6 = 'total_people' AND $7 = 'asc' THEN COUNT(DISTINCT p.id) END ASC NULLS LAST,
+            WHEN $7 = 'total_people' AND $8 = 'asc' THEN COUNT(DISTINCT p.id) END ASC NULLS LAST,
           c.name ASC
-        LIMIT $8
-        OFFSET $9
+        LIMIT $9
+        OFFSET $10
         `,
         [
           industry || null,
@@ -172,10 +180,11 @@ export class CompanyService {
           includeConsumerSites,
           search ? `%${search}%` : null,
           revenueRanges.length > 0 ? revenueRanges : null,
+          years.length > 0 ? years : null,
           validatedSortField,
           sortDirection,
           pageSize,
-          (page - 1) * pageSize,
+          (page - 1) * pageSize
         ]
       );
 
