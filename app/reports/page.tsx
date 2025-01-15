@@ -13,8 +13,8 @@ export default async function ReportsPage({
 }) {
   const period = await Promise.resolve(searchParams.period);
   const periodMonths = Number(period) || 18;
-  const topDroppers = await getTopDroppers(5, periodMonths);
-  const topIncreases = await getTopIncreases(5, periodMonths);
+  const topDroppers = await getTopDroppers(10, periodMonths);
+  const topIncreases = await getTopIncreases(10, periodMonths);
 
   return (
     <div className="container mx-auto py-8">
