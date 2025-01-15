@@ -172,11 +172,28 @@ export default async function CompanyPage({ params }: PageProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Company Details */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-muted-foreground" />
+              <div className="flex items-start gap-2">
+                <Building2 className="w-5 h-5 text-muted-foreground mt-1" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Industry</div>
-                  <div className="font-medium">{companyData.enrichment_data?.about?.industry || 'N/A'}</div>
+                  <div className="text-sm text-muted-foreground">Industries</div>
+                  <div className="font-medium">
+                    {companyData.enrichment_data?.about?.industry && (
+                      <div className="flex items-center gap-1">
+                        <Badge variant="secondary">{companyData.enrichment_data.about.industry}</Badge>
+                        <span className="text-xs text-muted-foreground">(primary)</span>
+                      </div>
+                    )}
+                    {companyData.enrichment_data?.about?.industries && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {companyData.enrichment_data.about.industries
+                          .filter(ind => ind !== companyData.enrichment_data?.about?.industry)
+                          .map((industry, i) => (
+                            <Badge key={i} variant="outline">{industry}</Badge>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
