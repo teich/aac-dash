@@ -10,16 +10,18 @@ export class PersonService {
         SELECT 
           p.id,
           p.name,
+          p.email,
           p.company_id,
           c.name as company_name,
           c.domain as company_domain,
+          p.enrichment_data,
           COUNT(DISTINCT o.id) as total_orders,
           COALESCE(SUM(o.amount), '0') as total_sales
         FROM people p
         JOIN companies c ON c.id = p.company_id
         LEFT JOIN orders o ON o.person_id = p.id
         WHERE p.id = $1
-        GROUP BY p.id, p.name, p.company_id, c.name, c.domain
+        GROUP BY p.id, p.name, p.email, p.company_id, c.name, c.domain, p.enrichment_data
       `, [id]);
 
       if (personResult.rows.length === 0) {

@@ -60,6 +60,52 @@ export interface Company {
   state?: string;
 }
 
+export interface PersonEnrichmentData {
+  data: {
+    skills?: string[];
+    education?: Array<{
+      school: {
+        name: string;
+        location?: {
+          name?: string;
+        };
+      };
+      degrees?: string[];
+      start_date?: string;
+      end_date?: string;
+    }>;
+    experience?: Array<{
+      title: {
+        name: string;
+        role?: string;
+        levels?: string[];
+      };
+      company: {
+        name: string;
+        industry?: string;
+        location?: {
+          name?: string;
+        };
+      };
+      start_date?: string;
+      end_date?: string;
+      is_primary?: boolean;
+    }>;
+    profiles?: Array<{
+      network: string;
+      url: string;
+      username: string;
+    }>;
+    location_name?: string;
+    work_email?: string;
+    mobile_phone?: string;
+    phone_numbers?: boolean;
+    street_addresses?: boolean;
+    location_street_address?: string;
+    location_postal_code?: string;
+  };
+}
+
 export interface Person {
   id: string;
   name: string;
@@ -69,6 +115,8 @@ export interface Person {
   total_orders: number;
   total_sales: string;
   orders: Order[];
+  email: string;
+  enrichment_data?: PersonEnrichmentData;
 }
 
 export interface LineItem {
