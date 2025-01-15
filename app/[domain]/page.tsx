@@ -169,9 +169,11 @@ export default async function CompanyPage({ params }: PageProps) {
             <p className="text-muted-foreground">{companyData.enrichment_data.descriptions.primary}</p>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Company Details */}
-            <div className="space-y-4">
+            <div className="space-y-6">
+              <h3 className="font-semibold">Company Details</h3>
+              <div className="space-y-4">
               <div className="flex items-start gap-2">
                 <Building2 className="w-5 h-5 text-muted-foreground mt-1" />
                 <div>
@@ -218,8 +220,11 @@ export default async function CompanyPage({ params }: PageProps) {
               </div>
             </div>
 
+            </div>
             {/* Location & Revenue */}
-            <div className="space-y-4">
+            <div className="space-y-6">
+              <h3 className="font-semibold">Location & Financials</h3>
+              <div className="space-y-4">
               {companyData.enrichment_data?.locations?.headquarters && (
                 <div className="flex items-center gap-2">
                   <Globe2 className="w-5 h-5 text-muted-foreground" />
@@ -245,10 +250,7 @@ export default async function CompanyPage({ params }: PageProps) {
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Technologies & Social */}
-            <div className="space-y-4">
+              </div>
             </div>
           </div>
         </CardContent>
