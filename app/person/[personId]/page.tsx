@@ -176,7 +176,7 @@ export default async function PersonPage({ params }: PageProps) {
                   {personData.enrichment_data.data.profiles.map((profile) => (
                     <a
                       key={profile.url}
-                      href={profile.url}
+                      href={profile.url.startsWith('http') ? profile.url : `https://${profile.url}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center text-sm text-blue-600 hover:underline"
