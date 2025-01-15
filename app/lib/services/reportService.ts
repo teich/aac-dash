@@ -39,6 +39,11 @@ export async function getTopDroppers(limit: number = 10, periodMonths: number = 
       JOIN people p ON o.person_id = p.id
       JOIN companies c ON p.company_id = c.id
       WHERE o.date >= NOW() - (INTERVAL '1 month' * $3)
+      AND NOT EXISTS (
+        SELECT 1 FROM unnest($4::text[]) as cd
+        WHERE LOWER(c.domain) = LOWER(cd) 
+        OR LOWER(c.domain) LIKE '%.' || LOWER(cd)
+      )
       GROUP BY c.id, c.name, c.domain
       HAVING 
         SUM(CASE 
@@ -63,19 +68,11 @@ export async function getTopDroppers(limit: number = 10, periodMonths: number = 
   const result = await pool.query<SpendingDropper>(query, [
     limit,
     periodMonths,
-    periodMonths * 2
+    periodMonths * 2,
+    CONSUMER_DOMAINS
   ]);
   
-  // Filter out consumer domains
-  const filteredRows = result.rows.filter(row => {
-    const domain = row.companyDomain.toLowerCase();
-    return !CONSUMER_DOMAINS.some((consumerDomain: string) => 
-      domain === consumerDomain.toLowerCase() || 
-      domain.endsWith('.' + consumerDomain.toLowerCase())
-    );
-  });
-  
-  return filteredRows;
+  return result.rows;
 }
 
 export async function getTopIncreases(limit: number = 10, periodMonths: number = 18): Promise<SpendingIncrease[]> {
@@ -98,6 +95,11 @@ export async function getTopIncreases(limit: number = 10, periodMonths: number =
       JOIN people p ON o.person_id = p.id
       JOIN companies c ON p.company_id = c.id
       WHERE o.date >= NOW() - (INTERVAL '1 month' * $3)
+      AND NOT EXISTS (
+        SELECT 1 FROM unnest($4::text[]) as cd
+        WHERE LOWER(c.domain) = LOWER(cd) 
+        OR LOWER(c.domain) LIKE '%.' || LOWER(cd)
+      )
       GROUP BY c.id, c.name, c.domain
       HAVING 
         SUM(CASE 
@@ -122,17 +124,9 @@ export async function getTopIncreases(limit: number = 10, periodMonths: number =
   const result = await pool.query<SpendingIncrease>(query, [
     limit,
     periodMonths,
-    periodMonths * 2
+    periodMonths * 2,
+    CONSUMER_DOMAINS
   ]);
   
-  // Filter out consumer domains
-  const filteredRows = result.rows.filter(row => {
-    const domain = row.companyDomain.toLowerCase();
-    return !CONSUMER_DOMAINS.some((consumerDomain: string) => 
-      domain === consumerDomain.toLowerCase() || 
-      domain.endsWith('.' + consumerDomain.toLowerCase())
-    );
-  });
-  
-  return filteredRows;
+  return result.rows;
 }
