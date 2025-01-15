@@ -4,7 +4,7 @@ import { pool } from '@/lib/db';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { CompanyAvatar } from '@/components/ui/company-avatar';
 import { OrdersTable } from './OrdersTable';
 import { CompanyBreadcrumb } from '@/app/components/CompanyBreadcrumb';
 
@@ -63,6 +63,7 @@ interface CompanyData {
   linkedin_url: string | null;
   enrichment_data: EnrichmentData;
   orders: Order[];
+  logo_square?: string;
 }
 
 // Helper function to format revenue ranges nicely
@@ -78,7 +79,8 @@ async function getCompanyData(domain: string): Promise<CompanyData | null> {
         name as company_name, 
         domain, 
         linkedin_url,
-        enrichment_data::jsonb as enrichment_data
+        enrichment_data::jsonb as enrichment_data,
+        enrichment_data->'assets'->'logoSquare'->>'src' as logo_square
       FROM companies
       WHERE domain = $1
     `, [domain]);
@@ -142,11 +144,11 @@ export default async function CompanyPage({ params }: PageProps) {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex gap-4 items-center">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback className="bg-primary/10">
-                  {companyData.enrichment_data?.about?.name?.slice(0, 2) || companyData.company_name.slice(0, 2)}
-                </AvatarFallback>
-              </Avatar>
+              <CompanyAvatar 
+                name={companyData.enrichment_data?.about?.name || companyData.company_name}
+                logoSquare={companyData.logo_square}
+                className="h-12 w-12"
+              />
               <div>
                 <CardTitle className="text-2xl">
                   {companyData.enrichment_data?.about?.name || companyData.company_name}

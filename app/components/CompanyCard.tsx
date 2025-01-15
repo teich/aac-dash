@@ -21,7 +21,7 @@ import {
   UserSquare2,
   ShoppingCart,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CompanyAvatar } from "@/components/ui/company-avatar";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -64,16 +64,6 @@ export function CompanyCard({ company }: { company: Company }) {
     }).format(amount);
   };
 
-  // Get initials for the avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   // Format industry name for display
   const formatIndustry = (industry: string) => {
     return industry
@@ -105,14 +95,11 @@ export function CompanyCard({ company }: { company: Company }) {
         <CardHeader>
           <div className="flex justify-between items-start gap-4">
             <div className="flex gap-3 items-center">
-              <Avatar className="h-12 w-12">
-                {company.logo_square && (
-                  <AvatarImage src={company.logo_square} alt={`${company.name} logo`} />
-                )}
-                <AvatarFallback className="bg-primary/10">
-                  {getInitials(company.name)}
-                </AvatarFallback>
-              </Avatar>
+              <CompanyAvatar
+                name={company.name}
+                logoSquare={company.logo_square}
+                className="h-12 w-12"
+              />
               <div>
                 <CardTitle className="text-xl font-bold">
                   {company.name}
