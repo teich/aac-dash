@@ -40,9 +40,6 @@ interface EnrichmentData {
     primary?: string;
     tagline?: string;
   };
-  technologies?: {
-    active?: string[];
-  };
 }
 
 interface LineItem {
@@ -235,18 +232,6 @@ export default async function CompanyPage({ params }: PageProps) {
 
             {/* Technologies & Social */}
             <div className="space-y-4">
-              {companyData.enrichment_data?.technologies?.active && companyData.enrichment_data.technologies.active.length > 0 && (
-                <div className="flex items-start gap-2">
-                  <BookOpen className="w-5 h-5 text-muted-foreground mt-1" />
-                  <div>
-                    <div className="text-sm text-muted-foreground">Technologies</div>
-                    <div className="font-medium">
-                      {companyData.enrichment_data.technologies.active.slice(0, 5).join(', ')}
-                      {companyData.enrichment_data.technologies.active.length > 5 && ' and more...'}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </CardContent>
