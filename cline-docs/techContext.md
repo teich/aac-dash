@@ -1,36 +1,71 @@
-### Frontend
+### Frontend Architecture
 - Next.js 15.1.4 with App Router
 - React 19
-- TypeScript
+- TypeScript with strict mode
 - Tailwind CSS for styling
-- Radix UI components
-- Lucide React for icons
-- TanStack Table for data tables
-- Use `pnpm dlx shadcn@latest add [component-name]` to add new shadcn components
-- Always check for and prefer shadcn components before implementing custom solutions
+- Component Libraries:
+  * Radix UI for accessible primitives
+  * shadcn/ui for styled components
+  * Lucide React for icons
+  * TanStack Table for data tables
+
+### Development Patterns
+- Service Layer for business logic
+- Type-safe database operations
+- Component-based architecture
+- Server-side rendering with streaming
+- Progressive loading with Suspense
+- URL-based state management
+
+### Component Guidelines
+- Use shadcn components when available
+  * Add new components: `pnpm dlx shadcn@latest add [component-name]`
+  * Check existing components before custom implementations
+- Prefer server components by default
+- Use client components only when needed:
+  * Interactive features
+  * Browser APIs
+  * Real-time updates
 
 
-### Backend
+### Backend Architecture
 - Next.js Server Components/Actions
-- PostgreSQL database
-- Node-Postgres (pg) for database connectivity
-- Use pnpm for node commands
+- PostgreSQL database with JSONB support
+- Database Access:
+  * Node-Postgres (pg) for raw queries
+  * Service layer for business logic
+  * Type-safe database operations
+- Package Management:
+  * pnpm for dependency management
+  * Strict versioning for stability
 
 ## Development Setup
-1. Environment Variables Required:
-   - POSTGRES_HOST
-   - POSTGRES_PORT (defaults to 5432)
-   - POSTGRES_USER
-   - POSTGRES_PASSWORD
-   - POSTGRES_DB
 
-2. Development Commands:
+### Environment Configuration
+1. Required Variables:
+   ```
+   POSTGRES_HOST=
+   POSTGRES_PORT=5432  # default
+   POSTGRES_USER=
+   POSTGRES_PASSWORD=
+   POSTGRES_DB=
+   ```
+
+2. Development Workflow:
    ```bash
+   # Development
    pnpm dev        # Start development server with Turbopack
+   pnpm lint       # Run ESLint
+
+   # Production
    pnpm build      # Build for production
    pnpm start      # Run production server
-   pnpm lint       # Run ESLint
    ```
+
+3. Type Safety:
+   - Enable strict mode in tsconfig
+   - Run type checks before commits
+   - Maintain type definitions
 
 ## Technical Constraints
 

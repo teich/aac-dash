@@ -41,7 +41,7 @@ interface Company {
   year_founded?: string;
   monthly_visitors?: string;
   description?: string;
-  linkedin_url?: string;
+  linkedin_url?: string | null;
   logo_square?: string;
 }
 
@@ -208,13 +208,13 @@ export function CompanyCard({ company }: { company: Company }) {
               Website
             </Button>
           )}
-          {company.linkedin_url && (
+          {company.linkedin_url && typeof company.linkedin_url === 'string' && (
             <Button
               variant="outline"
               size="sm"
               onClick={(e) => {
                 e.preventDefault();
-                window.open(company.linkedin_url, "_blank");
+                window.open(company.linkedin_url as string, "_blank");
               }}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
