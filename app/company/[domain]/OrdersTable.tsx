@@ -11,6 +11,7 @@ import {
   ColumnFiltersState,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -36,6 +37,7 @@ interface Order {
   date: string;
   amount: string;
   person_name: string;
+  person_id: string;
   line_items: LineItem[];
 }
 
@@ -84,6 +86,14 @@ const columns: ColumnDef<Order>[] = [
         </Button>
       )
     },
+    cell: ({ row }) => (
+      <Link 
+        href={`/person/${row.original.person_id}`}
+        className="text-blue-600 hover:underline"
+      >
+        {row.getValue("person_name")}
+      </Link>
+    ),
   },
   {
     accessorKey: "line_items",
@@ -213,4 +223,4 @@ export function OrdersTable({ data }: { data: Order[] }) {
       </div>
     </Card>
   );
-} 
+}

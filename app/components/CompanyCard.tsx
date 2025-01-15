@@ -90,7 +90,7 @@ export function CompanyCard({ company }: { company: Company }) {
   };
 
   return (
-    <Link href={`/${company.domain}`} className="block">
+    <Link href={`/company/${company.domain}`} className="block">
       <Card className="hover:shadow-lg transition-shadow">
         <CardHeader>
           <div className="flex justify-between items-start gap-4">

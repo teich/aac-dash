@@ -60,6 +60,17 @@ export interface Company {
   state?: string;
 }
 
+export interface Person {
+  id: string;
+  name: string;
+  company_id: string;
+  company_name: string;
+  company_domain: string;
+  total_orders: number;
+  total_sales: string;
+  orders: Order[];
+}
+
 export interface LineItem {
   product_name: string;
   quantity: number;
@@ -72,6 +83,7 @@ export interface Order {
   date: string;
   amount: string;
   person_name: string;
+  person_id: string;
   line_items: LineItem[];
 }
 

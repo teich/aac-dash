@@ -104,7 +104,7 @@ export function CompaniesTable({ companies, sortField, sortDirection }: Companie
           {companies.map((company) => (
             <TableRow key={company.id}>
               <TableCell className="font-medium">
-                <Link href={`/${company.domain}`} className="hover:underline">
+                <Link href={`/company/${company.domain}`} className="hover:underline">
                   {company.name}
                 </Link>
               </TableCell>
@@ -120,4 +120,4 @@ export function CompaniesTable({ companies, sortField, sortDirection }: Companie
       </Table>
     </div>
   );
-} 
+}

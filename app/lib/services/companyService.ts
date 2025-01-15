@@ -29,6 +29,7 @@ export class CompanyService {
           o.date,
           o.amount,
           p.name as person_name,
+          p.id as person_id,
           json_agg(json_build_object(
             'product_name', pr.name,
             'quantity', li.quantity,
@@ -41,7 +42,7 @@ export class CompanyService {
         JOIN line_items li ON li.order_id = o.id
         JOIN products pr ON pr.id = li.product_id
         WHERE c.domain = $1
-        GROUP BY o.id, o.invoice_number, o.date, o.amount, p.name
+        GROUP BY o.id, o.invoice_number, o.date, o.amount, p.name, p.id
         ORDER BY o.date DESC
       `, [domain]);
 

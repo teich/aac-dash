@@ -4,26 +4,72 @@
 
 ### Project Structure
 ```
-app/
-├── [domain]/              # Dynamic routes for company-specific pages
-│   ├── OrdersTable.tsx    # Company orders component
-│   └── page.tsx          # Company detail page
-├── components/           # Shared components
-│   ├── Breadcrumb.tsx
-│   ├── CompanyBreadcrumb.tsx
-│   ├── CompanyCard.tsx
-│   ├── CompanyCardSkeleton.tsx  # Loading state component
-│   ├── CompanyDetails.tsx       # Company info display
-│   ├── CompanyFilters.tsx       # Search and filtering
-│   ├── CompanyPagination.tsx    # Pagination controls
-│   └── Header.tsx
-├── lib/                 # Server-side utilities
-│   ├── actions.ts       # Server actions interface
-│   ├── constants.ts     # Shared constants
-│   ├── types.ts         # Shared TypeScript types
-│   └── services/        # Business logic layer
-│       └── companyService.ts  # Company-related operations
-└── page.tsx            # Main companies listing page
+├── app/                           # Next.js app directory
+│   ├── company/                   # Company-specific routes
+│   │   └── [domain]/             # Dynamic company routes
+│   │       ├── OrdersTable.tsx    # Company orders component
+│   │       └── page.tsx          # Company detail page
+│   ├── person/                    # Person-specific routes
+│   │   └── [personId]/           # Dynamic person routes
+│   │       └── page.tsx          # Person detail page
+│   ├── components/               # App-specific components
+│   │   ├── Breadcrumb.tsx
+│   │   ├── CompaniesTable.tsx
+│   │   ├── CompanyBreadcrumb.tsx
+│   │   ├── CompanyCard.tsx
+│   │   ├── CompanyCardSkeleton.tsx
+│   │   ├── CompanyDetails.tsx
+│   │   ├── CompanyFilters.tsx
+│   │   ├── CompanyPagination.tsx
+│   │   ├── Header.tsx
+│   │   ├── RevenueFilter.tsx
+│   │   ├── ViewToggle.tsx
+│   │   └── YearFilter.tsx
+│   ├── lib/                     # App-specific utilities
+│   │   ├── actions.ts           # Server actions interface
+│   │   ├── constants.ts         # Shared constants
+│   │   ├── types.ts            # Shared TypeScript types
+│   │   └── services/           # Business logic layer
+│   │       ├── companyService.ts  # Company-related operations
+│   │       └── personService.ts   # Person-related operations
+│   ├── globals.css             # Global styles
+│   ├── layout.tsx              # Root layout
+│   └── page.tsx               # Main companies listing page
+├── components/                 # Shared UI components
+│   └── ui/                    # Reusable UI components
+│       ├── avatar.tsx
+│       ├── badge.tsx
+│       ├── breadcrumb.tsx
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── command.tsx
+│       ├── company-avatar.tsx
+│       ├── dialog.tsx
+│       ├── input.tsx
+│       ├── pagination.tsx
+│       ├── popover.tsx
+│       ├── separator.tsx
+│       └── table.tsx
+├── lib/                       # Shared utilities
+│   ├── db.ts                 # Database configuration
+│   └── utils.ts              # Utility functions
+├── public/                   # Static assets
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+└── Configuration Files       # Project configuration
+    ├── .dockerignore
+    ├── .gitignore
+    ├── components.json
+    ├── Dockerfile
+    ├── eslint.config.mjs
+    ├── next.config.ts
+    ├── package.json
+    ├── postcss.config.mjs
+    ├── tailwind.config.ts
+    └── tsconfig.json
 ```
 
 ### Architecture Patterns
@@ -64,6 +110,11 @@ app/
      * Handles data transformations
      * Manages complex queries
      * Type-safe return values
+   - PersonService
+     * Manages person-related operations
+     * Handles contact information
+     * Manages person-company relationships
+     * Person-specific data transformations
 
 3. Server Actions Layer
    - Thin wrapper around services
@@ -84,11 +135,20 @@ app/
 1. Core Types (types.ts)
    - Database Models
      * Company
+     * Person
      * Order
      * LineItem
    - Component Props
+     * Company components
+     * Person components
+     * Shared UI components
    - API Responses
+     * Company responses
+     * Person responses
+     * Order data
    - Service Interfaces
+     * CompanyService
+     * PersonService
 
 2. Type Safety Patterns
    - Strict null checking

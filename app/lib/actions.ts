@@ -1,6 +1,7 @@
 "use server";
 
 import { CompanyService } from "./services/companyService";
+import { PersonService } from "./services/personService";
 import type { GetCompaniesOptions } from "./types";
 
 export async function getCompaniesData(
@@ -31,4 +32,8 @@ export async function getCompaniesData(
 
 export async function getCompanyByDomain(domain: string) {
   return CompanyService.getCompanyByDomain(domain);
+}
+
+export async function getPersonById(id: string) {
+  return PersonService.getPersonById(id);
 }
