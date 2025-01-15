@@ -2,7 +2,7 @@
 
 ## Architecture Patterns
 
-### Next.js App Router Structure
+### Project Structure
 ```
 app/
 ├── [domain]/              # Dynamic routes for company-specific pages
@@ -12,59 +12,89 @@ app/
 │   ├── Breadcrumb.tsx
 │   ├── CompanyBreadcrumb.tsx
 │   ├── CompanyCard.tsx
+│   ├── CompanyCardSkeleton.tsx  # Loading state component
+│   ├── CompanyDetails.tsx       # Company info display
+│   ├── CompanyFilters.tsx       # Search and filtering
+│   ├── CompanyPagination.tsx    # Pagination controls
 │   └── Header.tsx
 ├── lib/                 # Server-side utilities
-│   └── actions.ts       # Server actions for data fetching
+│   ├── actions.ts       # Server actions interface
+│   ├── constants.ts     # Shared constants
+│   ├── types.ts         # Shared TypeScript types
+│   └── services/        # Business logic layer
+│       └── companyService.ts  # Company-related operations
 └── page.tsx            # Main companies listing page
 ```
 
-### Component Architecture
-1. Server Components (default)
-   - Main pages
-   - Data fetching components
-   - Static UI components
+### Architecture Patterns
 
-2. Client Components (when needed)
-   - Interactive UI elements
-   - Components requiring browser APIs
-   - Real-time updates
+1. Service Layer Pattern
+   - Business logic encapsulated in services
+   - Type-safe database operations
+   - Centralized data access patterns
+   - Error handling and logging
 
-### Data Flow
-1. Database Layer
-   - PostgreSQL with structured tables
-   - JSONB for flexible enrichment data
+2. Component Architecture
+   - Server Components (default)
+     * Main pages
+     * Data fetching components
+     * Static UI components
+   - Client Components (when needed)
+     * Interactive UI elements
+     * Components requiring browser APIs
+     * Real-time updates
+   - Shared Components
+     * Loading states (skeletons)
+     * UI patterns (cards, tables)
+     * Layout components
+
+### Data Flow Architecture
+
+1. Database Layer (PostgreSQL)
+   - Structured tables with JSONB for flexibility
    - Core Relationships:
      * Companies -> People (one-to-many)
      * People -> Orders (one-to-many)
      * Orders -> Line Items (one-to-many)
      * Line Items -> Products (many-to-one)
-   - Data hierarchy:
-     1. Companies (root entity)
-        - Enrichment data in JSONB for flexibility
-        - Stores company metadata and analytics
-     2. People (company contacts)
-        - Linked to companies via company_id
-        - Stores contact and address information
-     3. Orders (sales transactions)
-        - Linked to people via person_id
-        - Tracks order date and total amount
-     4. Line Items (order details)
-        - Linked to orders via order_id
-        - Linked to products via product_id
-        - Stores quantity and pricing details
-     5. Products (catalog)
-        - Referenced by line items
-        - Stores product information and SKUs
+   
+2. Service Layer (TypeScript Classes)
+   - CompanyService
+     * Encapsulates all company-related operations
+     * Handles data transformations
+     * Manages complex queries
+     * Type-safe return values
 
-2. Server Actions
-   - Centralized data fetching in actions.ts
-   - Type-safe database queries
-   - Error handling and logging
+3. Server Actions Layer
+   - Thin wrapper around services
+   - Exposes server-side functionality to components
+   - Handles parameter validation
 
-3. UI Layer
-   - Server-side rendering for initial data
-   - Client-side filtering and pagination
-   - Suspense boundaries for loading states
+4. Component Layer
+   - UI Components
+     * Display and user interaction
+     * Loading states
+     * Error boundaries
+   - Data Flow
+     * Server actions -> Services -> Database
+     * Type-safe data throughout the stack
+
+### Type System Architecture
+
+1. Core Types (types.ts)
+   - Database Models
+     * Company
+     * Order
+     * LineItem
+   - Component Props
+   - API Responses
+   - Service Interfaces
+
+2. Type Safety Patterns
+   - Strict null checking
+   - Required vs optional fields
+   - Union types for variants
+   - Type guards for runtime checks
 
 ## Key Technical Decisions
 

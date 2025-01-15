@@ -21,7 +21,7 @@ import {
   UserSquare2,
   ShoppingCart,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CompanyAvatar } from "@/components/ui/company-avatar";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -41,7 +41,7 @@ interface Company {
   year_founded?: string;
   monthly_visitors?: string;
   description?: string;
-  linkedin_url?: string;
+  linkedin_url?: string | null;
   logo_square?: string;
 }
 
@@ -62,16 +62,6 @@ export function CompanyCard({ company }: { company: Company }) {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
-  };
-
-  // Get initials for the avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   // Format industry name for display
@@ -105,14 +95,11 @@ export function CompanyCard({ company }: { company: Company }) {
         <CardHeader>
           <div className="flex justify-between items-start gap-4">
             <div className="flex gap-3 items-center">
-              <Avatar className="h-12 w-12">
-                {company.logo_square && (
-                  <AvatarImage src={company.logo_square} alt={`${company.name} logo`} />
-                )}
-                <AvatarFallback className="bg-primary/10">
-                  {getInitials(company.name)}
-                </AvatarFallback>
-              </Avatar>
+              <CompanyAvatar
+                name={company.name}
+                logoSquare={company.logo_square}
+                className="h-12 w-12"
+              />
               <div>
                 <CardTitle className="text-xl font-bold">
                   {company.name}
@@ -221,13 +208,13 @@ export function CompanyCard({ company }: { company: Company }) {
               Website
             </Button>
           )}
-          {company.linkedin_url && (
+          {company.linkedin_url && typeof company.linkedin_url === 'string' && (
             <Button
               variant="outline"
               size="sm"
               onClick={(e) => {
                 e.preventDefault();
-                window.open(company.linkedin_url, "_blank");
+                window.open(company.linkedin_url as string, "_blank");
               }}
             >
               <ExternalLink className="w-4 h-4 mr-2" />

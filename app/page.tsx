@@ -1,36 +1,16 @@
-// app/page.tsx
 import { Suspense } from 'react';
 import { getCompaniesData } from './lib/actions';
 import { CompanyCard } from './components/CompanyCard';
 import { CompaniesTable } from './components/CompaniesTable';
 import { CompanyFilters } from './components/CompanyFilters';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { CompanyPagination } from './components/CompanyPagination';
+import { CompanyCardSkeleton } from './components/CompanyCardSkeleton';
 
-const CardSkeleton = () => (
-  <div className="space-y-3">
-    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-    <div className="space-y-2">
-      <div className="h-4 bg-gray-200 rounded w-full"></div>
-      <div className="h-4 bg-gray-200 rounded w-full"></div>
-      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-    </div>
-  </div>
-);
-
-type PageProps = {
+interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
-export default async function Page({ searchParams }: PageProps) {
+export default async function CompaniesPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const industry = typeof params.industry === 'string' ? params.industry : undefined;
   const includeConsumerSites = params.includeConsumer === 'true';
@@ -88,7 +68,7 @@ export default async function Page({ searchParams }: PageProps) {
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {companies.map(company => (
-            <Suspense key={company.id} fallback={<CardSkeleton />}>
+            <Suspense key={company.id} fallback={<CompanyCardSkeleton />}>
               <CompanyCard company={company} />
             </Suspense>
           ))}
@@ -101,61 +81,11 @@ export default async function Page({ searchParams }: PageProps) {
         />
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-8">
-          <Pagination>
-            <PaginationContent>
-              {page > 1 && (
-                <PaginationItem>
-                  <PaginationPrevious href={`?${new URLSearchParams({ ...params, page: (page - 1).toString() })}`} />
-                </PaginationItem>
-              )}
-              
-              <PaginationItem>
-                <PaginationLink 
-                  href={`?${new URLSearchParams({ ...params, page: "1" })}`}
-                  isActive={page === 1}
-                >
-                  1
-                </PaginationLink>
-              </PaginationItem>
-
-              {page > 3 && <PaginationEllipsis />}
-
-              {page !== 1 && page !== totalPages && (
-                <PaginationItem>
-                  <PaginationLink 
-                    href={`?${new URLSearchParams({ ...params, page: page.toString() })}`}
-                    isActive={true}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              )}
-
-              {page < totalPages - 2 && <PaginationEllipsis />}
-
-              {totalPages !== 1 && (
-                <PaginationItem>
-                  <PaginationLink 
-                    href={`?${new URLSearchParams({ ...params, page: totalPages.toString() })}`}
-                    isActive={page === totalPages}
-                  >
-                    {totalPages}
-                  </PaginationLink>
-                </PaginationItem>
-              )}
-
-              {page < totalPages && (
-                <PaginationItem>
-                  <PaginationNext href={`?${new URLSearchParams({ ...params, page: (page + 1).toString() })}`} />
-                </PaginationItem>
-              )}
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+      <CompanyPagination 
+        currentPage={page}
+        totalPages={totalPages}
+        params={params}
+      />
     </div>
   );
 }
