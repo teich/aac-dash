@@ -8,8 +8,16 @@ export function Header() {
           <Link href="/" className="font-semibold text-xl">
             AAC Customer Insight
           </Link>
+          <nav className="flex items-center space-x-4">
+            <Link 
+              href="/reports" 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Reports
+            </Link>
+          </nav>
         </div>
       </div>
     </header>
   )
-} 
+}
